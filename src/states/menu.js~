@@ -1,0 +1,23 @@
+class Menu extends Phaser.State {
+
+    constructor() {
+	super();
+    }
+    
+    create() {
+	var text = this.add.text(this.game.width * 0.5, this.game.height * 0.5, 'MENU', {
+	    font: '42px "Indie Flower"', fill: '#ffffff', align: 'center'
+	});
+	text.anchor.set(0.5);
+
+	this.input.onDown.add(this.startGame, this);
+    }
+
+    startGame () {
+	this.game.global.current_stage = 1;
+	this.game.state.start('game', false, false, this.game.global.current_stage);
+  }
+
+}
+
+export default Menu;

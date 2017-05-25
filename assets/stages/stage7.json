@@ -1,0 +1,16 @@
+{
+  "3-stars":12,
+  "2-stars":15,
+  "size_x":8,
+  "size_y":8,
+  "tiles": [
+    "tttggggg",
+    "gttggggg",
+    "gggggggg",
+    "gggggggg",
+    "ggssgggg",
+    "gggggggm",
+    "gggggggm",
+    "gggggggm"
+    ]
+}

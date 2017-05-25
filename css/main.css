@@ -1,0 +1,25 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #ffffff;
+}
+.game {
+    padding-left:0;
+    padding-right:0;
+    margin-left:auto;
+    margin-right:auto;
+    display:block;
+    width:100%;
+}
+canvas {
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-crisp-edges;
+    image-rendering: pixelated;
+}
+.fontPreload {
+    font-family: 'Indie Flower';
+    position: absolute;
+    left:100px;
+}
+
+	   
