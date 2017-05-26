@@ -38,6 +38,7 @@ class Game extends Phaser.State {
 	this.targets = [];
 	this.turn = 0;
 	this.state = 0;
+	this.recorded_boards = [];
 	
 	this.label_turn = 0;
 	this.label_target = 0;
@@ -70,6 +71,8 @@ class Game extends Phaser.State {
 	this.spores = this.game.add.group();
 	this.overdrop = this.game.add.group();
 	this.overdrop.alpha = 0.5;
+
+	this.recorded_boards = [];
 	
 	// Initialize board
 	console.log('stage'+this.stage_number);
@@ -142,7 +145,7 @@ class Game extends Phaser.State {
 	this.back_button.play('anim', 10, true);
 	this.back_button.inputEnabled = true;
 	this.back_button.input.useHandCursor = true;
-	this.back_button.events.onInputDown.add(this.restart, this);
+	this.back_button.events.onInputDown.add(this.rewindMove, this);
 
 	this.next_button = this.game.add.sprite(-50,300,'button_next');
 	this.next_button.anchor.set(0.5);
@@ -293,8 +296,78 @@ class Game extends Phaser.State {
     restart() {
 	this.game.state.start('game',null,null,true,false,this.game.global.current_stage);
     }
+
+    rewindMove() {
+	if (this.recorded_boards.length == 0)
+	    return;
+
+	console.log(this.recorded_boards);
+	var last_board = this.recorded_boards.pop();
+	for (var i = 0; i < this.board_width; i++){
+	    for (var j = 0; j < this.board_height; j++){
+		if (this.board[i][j].mushroom){
+		    this.renewMushroom(i,j);
+		} 
+	    }
+	}
+
+	for (var i = 0; i < last_board.length; i+=1){
+	    console.log(last_board);
+	    this.renewMushroom(last_board[i][0],last_board[i][1]);
+	}
+	
+	this.turn -= 1;
+	this.label_turn.setText('turn: '+this.turn);
+    }
+
+    renewMushroom(x,y){
+	if (this.board[x][y].mushroom == false){ // Weak mushroom
+	    var sprite = this.middledrop.create(this.x_offset + x*32,this.y_offset + y*32, 'tile-mushroom-dieing');
+	    var anim = sprite.animations.add('dieing',[5,4,3,2,1]);
+	    sprite.animations.play('dieing',5,false);
+
+	    this.board[x][y].mushroom_sprite = sprite;
+	    this.board[x][y].mushroom = true;
+	    this.board[x][y].mushroom_life = 1;	    
+	} else if(this.board[x][y].mushroom_life == 1){ // Strong mushroom
+	    var sprite = this.board[x][y].mushroom_sprite;
+	    sprite.loadTexture('tile-mushroom',0);
+	    var anim = sprite.animations.add('dieing',[5,4,3,2,1]);
+	    sprite.animations.play('dieing',5,false);
+	    sprite.animations.currentAnim.onComplete.add(function(){this.loadTexture('tile-mushroom',0);this.animations.add('current',[0,1]);this.animations.play('current',2,true);},sprite);
+
+	    this.board[x][y].mushroom_life = 2;
+	    
+	} else if(this.board[x][y].mushroom_life == 2){ // Despawn
+	    this.board[x][y].mushroom = false;
+	    var sprite = this.board[x][y].mushroom_sprite;
+	    sprite.loadTexture('tile-mushroom-borning',0);
+	    var anim = sprite.animations.add('anim',[5,4,3,2,1]);
+	    sprite.animations.play('anim', 10, false);
+	    anim.onComplete.add(function(){this.destroy();},sprite);
+
+	    this.board[x][y].mushroom = false;
+	    this.board[x][y].mushroom_life = 0;
+	}
+	
+    }
+    
+    copyBoard() {
+	var copy = [];
+	console.log(this.board[0]);
+	for(var i = 0; i < this.board.length; i+=1){
+	    for(var j = 0; j < this.board[0].length; j+=1){
+		if(this.board[i][j].mushroom && this.board[i][j].mushroom_life == 1){
+		    copy.push([i,j]);
+		}
+	    }
+	}
+	return copy;
+    }
     
     moveMushrooms(dir) { // This is a bit tricky, but it was made like this so I can change only one function to test all possible directions
+	this.recorded_boards.push(this.copyBoard());
+	
 	var i,j = 0;
 	var i_init, i_final, j_init, j_final = 0;
 	var hor = false;
