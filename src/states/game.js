@@ -167,10 +167,28 @@ class Game extends Phaser.State {
 	
 	// Keyboard input
 	this.keys = this.game.global.defineKeys(this);
-	this.keys.up.onDown.add(this.move,this);
-	this.keys.down.onDown.add(this.move,this);
-	this.keys.left.onDown.add(this.move,this);
-	this.keys.right.onDown.add(this.move,this);
+	// this.keys.up.onDown.add(this.move,this);
+	// this.keys.down.onDown.add(this.move,this);
+	// this.keys.left.onDown.add(this.move,this);
+	// this.keys.right.onDown.add(this.move,this);
+
+	// Swipe setup
+	var that = this;
+	let SwipeModel = {
+	    up: function(point) {
+		that.move(that.keys.up);
+	    },
+	    down: function(point) {
+		that.move(that.keys.down);
+	    },
+	    left: function(point) {
+		that.move(that.keys.left);
+	    },
+	    right: function(point) {
+		that.move(that.keys.right);
+	    },
+	};
+	this.swipe = new Swipe(this.game, SwipeModel);
 	
     }
 
@@ -238,6 +256,9 @@ class Game extends Phaser.State {
     }
     
     update() {
+	// Swipe update
+	this.swipe.check();
+	
 	// Spawn mushrooms
 	if(!this.begun){
 	    this.begun = true;
